@@ -21,6 +21,7 @@ endif()
 set(SOURCES
     src/impls/Matrix.cpp
     src/impls/VMatrix.cpp
+    src/impls/Graph.cpp
     src/main.cpp
 )
 
@@ -28,6 +29,10 @@ set(HEADERS
     src/headers/Matrix.h
     src/headers/EulerSolver.h
     src/headers/VMatrix.h
+    src/headers/Component.h
+    src/headers/Circuit.h
+    src/headers/Graph.h
+    # src/headers/SpanningTree.h
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})

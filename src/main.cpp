@@ -1,10 +1,48 @@
 #include "headers/Matrix.h"
 #include "headers/VMatrix.h"
 #include "headers/EulerSolver.h"
+#include "headers/Circuit.h"
+#include "headers/Graph.h"
 #include <iostream>
 #include <iomanip>
 int main() {
-    
+
+    Circuit circuit;
+    circuit.addBranch({
+        {"L", ComponentType::Inductor, 0.1, 0, 1},
+        {"R1", ComponentType::Resistor, 1000.0, 0, 1}
+    });
+    circuit.addBranch({
+        {"C",  ComponentType::Capacitor, 1e-6, 0, 1}
+    });
+    circuit.addBranch({
+        {"R2", ComponentType::Resistor, 2000.0, 0, 1}
+    });
+    circuit.addBranch({
+        {"J",  ComponentType::CurrentSource, 0.001, 1, 0},
+    });
+
+    Graph graph(circuit);
+    graph.printGraph();
+    graph.printTree();
+    graph.printChords();
+
+    auto matstr2 = graph.getMatrixWithLabels();
+    std::cout << graph.getMatrixWithLabels() << std::endl;
+
+    StateSpaceSystem system = graph.buildStateSpaceSystem();
+    //graph.printStateSpaceSystem(system);
+    auto prtmtr = (*system.A).toString();
+    std::cout << "----------------" << std::endl;
+    std::cout << prtmtr << std::endl;
+    prtmtr = (*system.B).toString();
+    std::cout << prtmtr << std::endl;
+    prtmtr = (*system.C).toString();
+    std::cout << prtmtr << std::endl;
+    prtmtr = (*system.D).toString();
+    std::cout << prtmtr << std::endl;
+    std::cout << "----------------" << std::endl;
+
     double R1 = 1000.0;
     double R2 = 2000.0;
     double L = 0.1;
@@ -26,6 +64,17 @@ int main() {
     Matrix D(2, 1);
     D[0][0] = 0.0;
     D[1][0] = 1.0;
+
+    prtmtr = A.toString();
+    std::cout << "----------------" << std::endl;
+    std::cout << prtmtr << std::endl;
+    prtmtr = B.toString();
+    std::cout << prtmtr << std::endl;
+    prtmtr = C.toString();
+    std::cout << prtmtr << std::endl;
+    prtmtr = D.toString();
+    std::cout << prtmtr << std::endl;
+    std::cout << "----------------" << std::endl;
     
     Matrix X0(2, 1);
     X0[0][0] = J * R2;
