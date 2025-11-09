@@ -27,21 +27,16 @@ int main() {
     graph.printTree();
     graph.printChords();
 
-    auto matstr2 = graph.getMatrixWithLabels();
     std::cout << graph.getMatrixWithLabels() << std::endl;
 
-    StateSpaceSystem system = graph.buildStateSpaceSystem();
-    //graph.printStateSpaceSystem(system);
-    auto prtmtr = (*system.A).toString();
-    std::cout << "----------------" << std::endl;
-    std::cout << prtmtr << std::endl;
-    prtmtr = (*system.B).toString();
-    std::cout << prtmtr << std::endl;
-    prtmtr = (*system.C).toString();
-    std::cout << prtmtr << std::endl;
-    prtmtr = (*system.D).toString();
-    std::cout << prtmtr << std::endl;
-    std::cout << "----------------" << std::endl;
+    graph.printMSystem();
+
+    auto bigMtr = graph.selectBigMatrix();
+    for (size_t i = 0; i < bigMtr.getRows(); ++i) {
+        for (size_t j = 0; j < bigMtr.getCols(); ++j)
+            std::cout << std::setw(6) << bigMtr[i][j];
+        std::cout << std::endl;
+    }
 
     double R1 = 1000.0;
     double R2 = 2000.0;
@@ -52,7 +47,7 @@ int main() {
     Matrix A(2, 2);
     A[0][0] = -1.0/(C_val * R2); A[0][1] = -1.0/C_val;
     A[1][0] = 1.0/L;             A[1][1] = -R1/L;
-    
+
     Matrix B(2, 1);
     B[0][0] = 1.0/C_val;
     B[1][0] = 0.0;
@@ -65,16 +60,10 @@ int main() {
     D[0][0] = 0.0;
     D[1][0] = 1.0;
 
-    prtmtr = A.toString();
-    std::cout << "----------------" << std::endl;
-    std::cout << prtmtr << std::endl;
-    prtmtr = B.toString();
-    std::cout << prtmtr << std::endl;
-    prtmtr = C.toString();
-    std::cout << prtmtr << std::endl;
-    prtmtr = D.toString();
-    std::cout << prtmtr << std::endl;
-    std::cout << "----------------" << std::endl;
+    std::cout << A.toString() << std::endl;
+    std::cout << B.toString() << std::endl;
+    std::cout << C.toString() << std::endl;
+    std::cout << D.toString() << std::endl;
     
     Matrix X0(2, 1);
     X0[0][0] = J * R2;

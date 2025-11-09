@@ -256,11 +256,61 @@ std::string Graph::getMatrixWithLabels() {
 
     for (size_t j = 0; j < M->getCols(); ++j) {
       double value = (*M)[i][j];
-      result += (value == static_cast<int>(value)) ? std::to_string(static_cast<int>(value)) : std::to_string(value);
+      result += (value == static_cast<int>(value))
+                    ? std::to_string(static_cast<int>(value))
+                    : std::to_string(value);
       result += "  ";
     }
     result += "\n";
   }
 
   return result;
+}
+
+void Graph::printMSystem() {
+  std::cout << "___" << std::endl;
+  for (int i = 0; i < chords.size(); i++) {
+    std::cout << "| U_" << chords[i].second.name << " = ";
+    int treeIndex = 0;
+    for (auto& [key, vec] : tree) {
+      for (auto& [first, component] : vec) {
+        int coef = (*M)[i][treeIndex];
+        switch (coef) {
+          case 1:
+            std::cout << "- U_" << component.name << " ";
+            break;
+          case -1:
+            std::cout << "+ U_" << component.name << " ";
+            break;
+          default:
+            break;
+        }
+        treeIndex++;
+      }
+    }
+    std::cout << std::endl;
+  }
+  std::cout << "|" << std::endl;
+  int treeIndex = 0;
+  for (auto& [key, vec] : tree) {
+    for (auto& [first, component] : vec) {
+      std::cout << "| I_" << component.name << " = ";
+      for (int i = 0; i < chords.size(); i++) {
+        int coef = (*M)[i][treeIndex];
+        switch (coef) {
+          case 1:
+            std::cout << "+ I_" << chords[i].second.name << " ";
+            break;
+          case -1:
+            std::cout << "- I_" << chords[i].second.name << " ";
+            break;
+          default:
+            break;
+        }
+      }
+      treeIndex++;
+      std::cout << std::endl;
+    }
+  }
+  std::cout << "¯¯¯¯" << std::endl;
 }
