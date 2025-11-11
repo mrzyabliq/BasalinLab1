@@ -536,3 +536,26 @@ StateSpaceSystem Graph::buildStateSpaceSystem() {
   }
   return answer;
 }
+std::vector<std::string> Graph::getX() {
+  std::vector<std::string> answer;
+  for (auto& [key, component] : stateVariables) {
+    switch (component.type) {
+        case ComponentType::Capacitor:
+          answer.push_back("U_"+component.name);
+          break;
+        case ComponentType::Inductor:
+          answer.push_back("I_"+component.name);
+          break;
+        default:
+          break;
+    }
+  }
+  return answer;
+}
+std::vector<std::string> Graph::getY() {
+  std::vector<std::string> answer;
+  for (auto& [key, component] : outputVariables) {
+    answer.push_back("I_"+component.name);
+  }
+  return answer;
+}

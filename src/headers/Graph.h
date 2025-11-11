@@ -54,12 +54,13 @@ class Graph {
   int getRowForEdit(std::shared_ptr<Matrix> M, int col,
                     std::vector<int> usedRows);
 
- public:
+
   std::map<int, Component> stateVariables;
   std::map<int, Component> outputVariables;
   std::map<int, Component> sourceVariables;
-  int graphCount;
 
+  int graphCount;
+public:
   Graph(Circuit circuit, std::vector<std::string> outputs);
   void printTree();
   void printChords();
@@ -68,6 +69,8 @@ class Graph {
   void printMSystem();
   void printBigM();
   StateSpaceSystem buildStateSpaceSystem();
+  std::vector<std::string> getX();
+  std::vector<std::string> getY();
 };
 
 #endif  // GRAPH_H

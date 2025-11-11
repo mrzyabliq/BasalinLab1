@@ -87,41 +87,8 @@ int main() {
     
     auto results = EulerSolver::Solve((*system.A), (*system.B), C, D, X0, V, h, T);
     
-    std::cout << "Modelling results:" << std::endl;
-    std::cout << std::setw(10) << "t, s" 
-              << std::setw(12) << "u_C, V" 
-              << std::setw(12) << "i_L, A" 
-              << std::setw(12) << "i2, A" 
-              << std::setw(12) << "i3, A" 
-              << std::endl;
-    std::cout << std::string(58, '-') << std::endl;
-    
-    for (size_t i = 0; i < results.size(); i += 1000) {
-        double t = std::get<0>(results[i]);
-        Matrix& X = std::get<1>(results[i]);
-        Matrix& Y = std::get<2>(results[i]);
-        
-        std::cout << std::fixed << std::setprecision(6)
-                  << std::setw(10) << t
-                  << std::setw(12) << X[0][0]
-                  << std::setw(12) << X[1][0]
-                  << std::setw(12) << Y[0][0]
-                  << std::setw(12) << Y[1][0]
-                  << std::endl;
-    }
-    
-    if (!results.empty()) {
-        auto& last_result = results.back();
-        double t_end = std::get<0>(last_result);
-        Matrix& X_end = std::get<1>(last_result);
-        Matrix& Y_end = std::get<2>(last_result);
-        
-        std::cout << std::endl << "Stable condition (t = " << t_end << " s):" << std::endl;
-        std::cout << "u_C = " << X_end[0][0] << " V" << std::endl;
-        std::cout << "i_L = " << X_end[1][0] << " A" << std::endl;
-        std::cout << "i2 = " << Y_end[0][0] << " A" << std::endl;
-        std::cout << "i3 = " << Y_end[1][0] << " A" << std::endl;
-    }
-    
+    auto Xstring = graph.getX();
+    auto Ystring = graph.getY();
+    EulerSolver::PrintResults(results, Xstring, Ystring);
     return 0;
 }
