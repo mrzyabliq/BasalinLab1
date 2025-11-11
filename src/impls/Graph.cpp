@@ -1,6 +1,7 @@
 #include "Graph.h"
 
-Graph::Graph(Circuit circuit) {
+Graph::Graph(Circuit circuit, std::vector<std::string> outputs) {
+  this->outputs = outputs;
   for (auto branch : circuit.components) {
     for (auto comp : branch) {
       vertices.insert(comp.terminalIn);
@@ -45,6 +46,7 @@ Graph::Graph(Circuit circuit) {
 
   selectTree();
   buildMatrix();
+  buildBigMatrix();
 }
 
 void Graph::selectTree() {
@@ -123,15 +125,9 @@ void Graph::buildMatrix() {
       int branchStart = branch.first.first;
       int branchEnd = branch.first.second;
 
-      bool isOnPath = isBranchOnPath(branchStart, branchEnd, path);
-
-      if (isOnPath) {
-        int sign =
-            determineSign(chordStart, chordEnd, branchStart, branchEnd, path);
-        (*M)[chordIdx][branchIdx] = sign;
-      } else {
-        (*M)[chordIdx][branchIdx] = 0;
-      }
+      int sign =
+          determineSign(chordStart, chordEnd, branchStart, branchEnd, path);
+      (*M)[chordIdx][branchIdx] = sign;
     }
   }
 }
@@ -181,22 +177,13 @@ std::vector<int> Graph::findPathInTree(int start, int end) {
   return path;
 }
 
-bool Graph::isBranchOnPath(int branchStart, int branchEnd,
-                           const std::vector<int>& path) {
-  for (size_t i = 0; i < path.size() - 1; ++i)
-    if ((path[i] == branchStart && path[i + 1] == branchEnd) ||
-        (path[i] == branchEnd && path[i + 1] == branchStart))
-      return true;
-  return false;
-}
-
 int Graph::determineSign(int chordStart, int chordEnd, int branchStart,
                          int branchEnd, const std::vector<int>& path) {
   for (size_t i = 0; i < path.size() - 1; ++i)
     if (path[i] == branchStart && path[i + 1] == branchEnd)
-      return isSameDirection(chordStart, chordEnd, path) ? -1 : 1;
+      return -1;
     else if (path[i] == branchEnd && path[i + 1] == branchStart)
-      return isSameDirection(chordStart, chordEnd, path) ? 1 : -1;
+      return 1;
   return 0;
 }
 
@@ -234,37 +221,29 @@ void Graph::printGraph() {
     }
 }
 
-std::string Graph::getMatrixWithLabels() {
-  if (!M) return "Matrix is empty";
+void Graph::printMatrixWithLabels() {
+  if (!M) return;
 
   std::vector<std::pair<std::pair<int, int>, Component>> treeBranches;
   for (const auto& [vertex, neighbors] : tree)
     for (const auto& [neighbor, comp] : neighbors)
       treeBranches.emplace_back(std::make_pair(vertex, neighbor), comp);
 
-  std::string result = "M matrix (" + std::to_string(M->getRows()) + "x" +
-                       std::to_string(M->getCols()) + "):\n";
+  std::cout << "M matrix (" << M->getRows() << "x" << M->getCols() << "):\n";
 
-  result += "    ";
+  std::cout << "    ";
   for (size_t j = 0; j < treeBranches.size(); ++j)
-    result += treeBranches[j].second.name + "  ";
-  result += "\n";
+    std::cout << treeBranches[j].second.name << "  ";
+  std::cout << std::endl;
 
   for (size_t i = 0; i < M->getRows(); ++i) {
     std::string chordName = chords[i].second.name + ":";
-    result += chordName + std::string(4 - chordName.length(), ' ');
+    std::cout << chords[i].second.name << ":"
+              << std::string(4 - chordName.length(), ' ');
 
-    for (size_t j = 0; j < M->getCols(); ++j) {
-      double value = (*M)[i][j];
-      result += (value == static_cast<int>(value))
-                    ? std::to_string(static_cast<int>(value))
-                    : std::to_string(value);
-      result += "  ";
-    }
-    result += "\n";
+    for (size_t j = 0; j < M->getCols(); ++j) std::cout << (*M)[i][j] << "  ";
+    std::cout << std::endl;
   }
-
-  return result;
 }
 
 void Graph::printMSystem() {
@@ -313,4 +292,247 @@ void Graph::printMSystem() {
     }
   }
   std::cout << "¯¯¯¯" << std::endl;
+}
+
+std::map<std::string, int> Graph::getColsDict() {
+  std::map<std::string, int> answer;
+  graphCount = 0;
+  for (auto& [key, vec] : graph)
+    for (auto& [first, component] : vec) graphCount++;
+  int treeIndex = 0;
+  for (auto& [key, vec] : graph) {
+    for (auto& [first, component] : vec) {
+      if (component.type == ComponentType::Capacitor)
+        stateVariables[treeIndex] = component;
+      if (component.type == ComponentType::Inductor)
+        stateVariables[treeIndex + graphCount] = component;
+      if (contains(outputs, component.name))
+        outputVariables[treeIndex + graphCount] = component;
+      if (component.type == ComponentType::CurrentSource)
+        sourceVariables[treeIndex + graphCount] = component;
+      if (component.type == ComponentType::VoltageSource)
+        sourceVariables[treeIndex] = component;
+
+      answer["U_" + component.name] = treeIndex;
+      answer["I_" + component.name] = treeIndex + graphCount;
+      answer["dU_" + component.name + "/dt"] = treeIndex + graphCount * 2;
+      answer["dI_" + component.name + "/dt"] = treeIndex + graphCount * 3;
+      treeIndex++;
+    }
+  }
+  return answer;
+}
+
+void Graph::buildBigMatrix() {
+  auto compToInd = getColsDict();
+  std::vector<Component> resistors;
+  std::vector<Component> capacitors;
+  std::vector<Component> inductors;
+  for (auto& [key, vec] : graph) {
+    for (auto& [first, component] : vec) {
+      switch (component.type) {
+        case ComponentType::Resistor:
+          resistors.push_back(component);
+          break;
+        case ComponentType::Capacitor:
+          capacitors.push_back(component);
+          break;
+        case ComponentType::Inductor:
+          inductors.push_back(component);
+          break;
+        default:
+          break;
+      }
+    }
+  }
+  int rowsCount = M->getRows() + M->getCols() + resistors.size() +
+                  capacitors.size() + inductors.size();
+  bigM = std::make_shared<Matrix>(rowsCount, compToInd.size());
+
+  std::cout << "x(t):" << std::endl;
+  for (auto& [key, value] : stateVariables) {
+    std::cout << key << ": " << value.name << std::endl;
+  }
+  std::cout << std::endl << "d(x(t))/dt:" << std::endl;
+  for (auto& [key, value] : stateVariables) {
+    std::cout << key + graphCount * 2 << ": " << value.name << std::endl;
+  }
+  std::cout << std::endl << "y(t):" << std::endl;
+  for (auto& [key, value] : outputVariables) {
+    std::cout << key << ": " << value.name << std::endl;
+  }
+  std::cout << std::endl << "Source" << std::endl;
+  for (auto& [key, value] : sourceVariables) {
+    std::cout << key << ": " << value.name << std::endl;
+  }
+
+  int currentRow = 0;
+  for (int i = 0; i < chords.size(); i++) {
+    (*bigM)[currentRow][compToInd["U_" + chords[i].second.name]] = -1;
+    int treeIndex = 0;
+    for (auto& [key, vec] : tree) {
+      for (auto& [first, component] : vec) {
+        if ((*M)[i][treeIndex] != 0.0) {
+          (*bigM)[currentRow][compToInd["U_" + component.name]] =
+              -(*M)[i][treeIndex];
+        }
+        treeIndex++;
+      }
+    }
+    currentRow++;
+  }
+
+  int treeIndex = 0;
+  for (auto& [key, vec] : tree) {
+    for (auto& [first, component] : vec) {
+      (*bigM)[currentRow][compToInd["I_" + component.name]] = -1;
+      for (int i = 0; i < chords.size(); i++) {
+        if ((*M)[i][treeIndex] != 0) {
+          (*bigM)[currentRow][compToInd["I_" + chords[i].second.name]] =
+              (*M)[i][treeIndex];
+        }
+      }
+      currentRow++;
+      treeIndex++;
+    }
+  }
+
+  for (auto resistor : resistors) {
+    (*bigM)[currentRow][compToInd["U_" + resistor.name]] = -1;
+    (*bigM)[currentRow][compToInd["I_" + resistor.name]] = resistor.value;
+    currentRow++;
+  }
+  for (auto capacitor : capacitors) {
+    (*bigM)[currentRow][compToInd["I_" + capacitor.name]] = -1;
+    (*bigM)[currentRow][compToInd["dU_" + capacitor.name + "/dt"]] =
+        capacitor.value;
+    currentRow++;
+  }
+  for (auto inductor : inductors) {
+    (*bigM)[currentRow][compToInd["U_" + inductor.name]] = -1;
+    (*bigM)[currentRow][compToInd["dI_" + inductor.name + "/dt"]] =
+        inductor.value;
+    currentRow++;
+  }
+}
+
+void Graph::printBigM() {
+  for (size_t i = 0; i < (*bigM).getRows(); ++i) {
+    for (size_t j = 0; j < (*bigM).getCols(); ++j)
+      std::cout << std::setw(6) << (*bigM)[i][j];
+    std::cout << std::endl;
+  }
+}
+
+Matrix Graph::selectMatrix(std::map<int, Component> toFind,
+                           std::map<int, Component> toHelp,
+                           std::vector<int> ignoreCols) {
+  Matrix answer(toFind.size(), (*bigM).getCols());
+
+  int ansIdx = 0;
+  for (auto& [key, value] : toFind) {
+    std::shared_ptr<Matrix> editBigM = std::make_shared<Matrix>(*bigM);
+    for (int col : ignoreCols)
+      for (int row = 0; row < (*editBigM).getRows(); row++)
+        (*editBigM)[row][col] = 0;
+    int workRow = -1;
+    for (int i = 0; i < (*editBigM).getRows(); i++)
+      if ((*editBigM)[i][key] != 0) {
+        workRow = i;
+        break;
+      }
+    std::vector<int> usedRows = {workRow};
+    int colToEdit = getColToEdit(editBigM, workRow, key, toHelp);
+    while (colToEdit != -1 && usedRows.size() < (*editBigM).getRows() - 1) {
+      int rowForEdit = getRowForEdit(editBigM, colToEdit, usedRows);
+      double coef =
+          (*editBigM)[workRow][colToEdit] / (*editBigM)[rowForEdit][colToEdit];
+      for (int i = 0; i < (*editBigM).getCols(); i++)
+        (*editBigM)[workRow][i] -= (*editBigM)[rowForEdit][i] * coef;
+      usedRows.push_back(rowForEdit);
+      colToEdit = getColToEdit(editBigM, workRow, key, toHelp);
+    }
+
+    for (int i = 0; i < (*editBigM).getCols(); i++) {
+      (*editBigM)[workRow][i] /= (*editBigM)[workRow][key];
+      answer[ansIdx][i] = (*editBigM)[workRow][i];
+    }
+    ansIdx++;
+  }
+  return answer;
+}
+
+int Graph::getColToEdit(std::shared_ptr<Matrix> M, int row, int col,
+                        std::map<int, Component> cols) {
+  for (int i = 0; i < (*M).getCols(); i++)
+    if (i != col && cols.count(i) == 0 && (*M)[row][i] != 0) return i;
+  return -1;
+}
+int Graph::getRowForEdit(std::shared_ptr<Matrix> M, int col,
+                         std::vector<int> usedRows) {
+  for (int i = 0; i < (*M).getRows(); i++)
+    if (!contains(usedRows, i) && (*M)[i][col] != 0) return i;
+  return -1;
+}
+
+StateSpaceSystem Graph::buildStateSpaceSystem() {
+  std::cout << std::endl << "------------------------------------" << std::endl;
+  std::map<int, Component> dxdt;
+  for (auto& [key, value] : stateVariables) dxdt[key + graphCount * 2] = value;
+  std::map<int, Component> xt;
+  for (auto& [key, value] : stateVariables) xt[key] = value;
+  xt.insert(sourceVariables.begin(), sourceVariables.end());
+
+  auto selectedDxDt = selectMatrix(dxdt, xt, {});
+  for (size_t i = 0; i < selectedDxDt.getRows(); ++i) {
+    for (size_t j = 0; j < selectedDxDt.getCols(); ++j)
+      std::cout << std::setw(6) << selectedDxDt[i][j];
+    std::cout << std::endl;
+  }
+  std::cout << "------------------------------------" << std::endl;
+  std::vector<int> ignore;
+  for (auto& [key, value] : stateVariables)
+    ignore.push_back(key + graphCount * 2);
+  auto selectedYt = selectMatrix(outputVariables, xt, ignore);
+  for (size_t i = 0; i < selectedYt.getRows(); ++i) {
+    for (size_t j = 0; j < selectedYt.getCols(); ++j)
+      std::cout << std::setw(6) << selectedYt[i][j];
+    std::cout << std::endl;
+  }
+  std::cout << "------------------------------------" << std::endl;
+
+  StateSpaceSystem answer;
+  answer.A =
+      std::make_shared<Matrix>(stateVariables.size(), stateVariables.size());
+  answer.B =
+      std::make_shared<Matrix>(stateVariables.size(), sourceVariables.size());
+  answer.C =
+      std::make_shared<Matrix>(stateVariables.size(), stateVariables.size());
+  answer.D =
+      std::make_shared<Matrix>(stateVariables.size(), sourceVariables.size());
+  for (int i = 0; i < stateVariables.size(); i++) {
+    int currentCol = 0;
+    for (auto& [key, value] : stateVariables) {
+      (*answer.A)[i][currentCol] = -selectedDxDt[i][key];
+      currentCol++;
+    }
+    currentCol = 0;
+    for (auto& [key, value] : sourceVariables) {
+      (*answer.B)[i][currentCol] = -selectedDxDt[i][key];
+      currentCol++;
+    }
+  }
+  for (int i = 0; i < outputVariables.size(); i++) {
+    int currentCol = 0;
+    for (auto& [key, value] : stateVariables) {
+      (*answer.C)[i][currentCol] = -selectedYt[i][key];
+      currentCol++;
+    }
+    currentCol = 0;
+    for (auto& [key, value] : sourceVariables) {
+      (*answer.D)[i][currentCol] = -selectedYt[i][key];
+      currentCol++;
+    }
+  }
+  return answer;
 }

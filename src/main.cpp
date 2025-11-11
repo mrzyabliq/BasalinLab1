@@ -22,21 +22,21 @@ int main() {
         {"J",  ComponentType::CurrentSource, 0.001, 1, 0},
     });
 
-    Graph graph(circuit);
+    std::vector<std::string> outputs = {"C", "R2"};
+
+    Graph graph(circuit, outputs);
     graph.printGraph();
     graph.printTree();
     graph.printChords();
-
-    std::cout << graph.getMatrixWithLabels() << std::endl;
-
+    graph.printMatrixWithLabels();
     graph.printMSystem();
-
-    auto bigMtr = graph.selectBigMatrix();
-    for (size_t i = 0; i < bigMtr.getRows(); ++i) {
-        for (size_t j = 0; j < bigMtr.getCols(); ++j)
-            std::cout << std::setw(6) << bigMtr[i][j];
-        std::cout << std::endl;
-    }
+    graph.printBigM();
+    auto system = graph.buildStateSpaceSystem();
+    std::cout << (*system.A).toString() << std::endl;
+    std::cout << (*system.B).toString() << std::endl;
+    std::cout << (*system.C).toString() << std::endl;
+    std::cout << (*system.D).toString() << std::endl;
+    std::cout << "------------------------------------" << std::endl;
 
     double R1 = 1000.0;
     double R2 = 2000.0;
@@ -85,7 +85,7 @@ int main() {
     std::cout << "Step h = " << h << " s, modelling time T = " << T << " s" << std::endl;
     std::cout << std::endl;
     
-    auto results = EulerSolver::Solve(A, B, C, D, X0, V, h, T);
+    auto results = EulerSolver::Solve((*system.A), (*system.B), C, D, X0, V, h, T);
     
     std::cout << "Modelling results:" << std::endl;
     std::cout << std::setw(10) << "t, s" 

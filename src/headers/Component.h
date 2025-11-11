@@ -17,6 +17,8 @@ struct Component {
   int terminalIn;
   int terminalOut;
 
+  Component() : name(""), type(), value(0.0), terminalIn(-1), terminalOut(-1) {}
+
   Component(std::string n, ComponentType t, double v, int in, int out)
       : name(n), type(t), value(v), terminalIn(in), terminalOut(out) {}
 };
