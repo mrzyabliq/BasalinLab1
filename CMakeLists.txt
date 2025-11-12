@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.5)
 project(BasalinLab1)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
@@ -22,6 +22,7 @@ set(SOURCES
     src/impls/Matrix.cpp
     src/impls/VMatrix.cpp
     src/impls/Graph.cpp
+    src/impls/JsonReader.cpp
     src/main.cpp
 )
 
@@ -32,7 +33,7 @@ set(HEADERS
     src/headers/Component.h
     src/headers/Circuit.h
     src/headers/Graph.h
-    # src/headers/SpanningTree.h
+    src/headers/JsonReader.h
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
@@ -40,6 +41,7 @@ add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 target_include_directories(${PROJECT_NAME}
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src/headers
+        ${CMAKE_CURRENT_SOURCE_DIR}/libs
 )
 
 target_link_libraries(${PROJECT_NAME}

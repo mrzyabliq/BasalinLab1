@@ -14,12 +14,18 @@
 #include "Circuit.h"
 #include "Component.h"
 #include "Matrix.h"
+#include "VMatrix.h"
 
 struct StateSpaceSystem {
   std::shared_ptr<Matrix> A;
   std::shared_ptr<Matrix> B;
   std::shared_ptr<Matrix> C;
   std::shared_ptr<Matrix> D;
+  std::shared_ptr<VMatrix> V;
+  std::shared_ptr<Matrix> X0;
+
+  double h;
+  double T;
 };
 
 class Graph {

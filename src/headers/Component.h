@@ -1,6 +1,7 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 #include <string>
+#include <fstream>
 
 enum class ComponentType {
   VoltageSource,
@@ -55,6 +56,15 @@ inline std::string componentTypeToString(ComponentType type) {
     default:
       return "?";
   }
+}
+
+inline ComponentType stringToComponentType(const std::string& typeStr) {
+    if (typeStr == "Resistor") return ComponentType::Resistor;
+    if (typeStr == "Capacitor") return ComponentType::Capacitor;
+    if (typeStr == "Inductor") return ComponentType::Inductor;
+    if (typeStr == "VoltageSource") return ComponentType::VoltageSource;
+    if (typeStr == "CurrentSource") return ComponentType::CurrentSource;
+    throw std::invalid_argument("Unknown component type: " + typeStr);
 }
 
 #endif  // COMPONENT_H

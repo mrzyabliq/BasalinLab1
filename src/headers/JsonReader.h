@@ -1,0 +1,30 @@
+#ifndef JSONREADER_H
+#define JSONREADER_H
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
+
+#include "Circuit.h"
+#include "json.hpp"
+
+using json = nlohmann::json;
+
+class JsonReader {
+ private:
+  Circuit circuit_;
+  std::vector<std::string> outputs_;
+
+ public:
+  JsonReader(std::string filePath) { loadFromFile(filePath); }
+  Circuit getCircuit() { return circuit_; }
+  std::vector<std::string> getOutputs() { return outputs_; }
+  void printCircuitAndOutputs();
+
+ private:
+  bool loadFromFile(std::string file_path);
+  void parseCircuit(json config);
+  void parseOutputs(json config);
+};
+
+#endif  // JSONREADER_H

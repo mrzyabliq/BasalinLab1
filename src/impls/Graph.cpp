@@ -349,23 +349,6 @@ void Graph::buildBigMatrix() {
                   capacitors.size() + inductors.size();
   bigM = std::make_shared<Matrix>(rowsCount, compToInd.size());
 
-  std::cout << "x(t):" << std::endl;
-  for (auto& [key, value] : stateVariables) {
-    std::cout << key << ": " << value.name << std::endl;
-  }
-  std::cout << std::endl << "d(x(t))/dt:" << std::endl;
-  for (auto& [key, value] : stateVariables) {
-    std::cout << key + graphCount * 2 << ": " << value.name << std::endl;
-  }
-  std::cout << std::endl << "y(t):" << std::endl;
-  for (auto& [key, value] : outputVariables) {
-    std::cout << key << ": " << value.name << std::endl;
-  }
-  std::cout << std::endl << "Source" << std::endl;
-  for (auto& [key, value] : sourceVariables) {
-    std::cout << key << ": " << value.name << std::endl;
-  }
-
   int currentRow = 0;
   for (int i = 0; i < chords.size(); i++) {
     (*bigM)[currentRow][compToInd["U_" + chords[i].second.name]] = -1;
@@ -496,6 +479,8 @@ StateSpaceSystem Graph::buildStateSpaceSystem() {
       std::make_shared<Matrix>(stateVariables.size(), stateVariables.size());
   answer.D =
       std::make_shared<Matrix>(stateVariables.size(), sourceVariables.size());
+  answer.V = std::make_shared<VMatrix>(1, sourceVariables.size());
+  answer.X0 = std::make_shared<Matrix>(stateVariables.size(), 1);
   for (int i = 0; i < stateVariables.size(); i++) {
     int currentCol = 0;
     for (auto& [key, value] : stateVariables) {
@@ -520,6 +505,29 @@ StateSpaceSystem Graph::buildStateSpaceSystem() {
       currentCol++;
     }
   }
+
+  int VIndex = 0;
+  for (auto& [key, value] : sourceVariables){
+    double sourceValue = value.value;
+    (*answer.V).setFunction(0, VIndex, [sourceValue](double t) -> double { return sourceValue; });
+    VIndex++;
+  }
+
+  int X0Index = 0;
+  for (auto& [key, value] : stateVariables){
+    std::string variableName = (value.type == ComponentType::Inductor) ? "I_" + value.name : "U_" + value.name;
+    double varValue;
+    std::cout << "Input start " << variableName << ": ";
+    std::cin >> varValue;
+    (*answer.X0)[X0Index][0] = varValue;
+    X0Index++;
+  }
+
+  std::cout << "Input modelling time T: ";
+  std::cin >> answer.T;
+  std::cout << "Input step h: ";
+  std::cin >> answer.h;
+
   return answer;
 }
 std::vector<std::string> Graph::getX() {
