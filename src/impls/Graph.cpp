@@ -428,10 +428,10 @@ Matrix Graph::selectMatrix(std::map<int, Component> toFind,
                            std::map<int, Component> toHelp,
                            std::vector<int> ignoreCols) {
   Matrix answer(toFind.size(), (*bigM).getCols());
-
   int ansIdx = 0;
+  std::shared_ptr<Matrix> editBigM = std::make_shared<Matrix>(*bigM);
+
   for (auto& [key, value] : toFind) {
-    std::shared_ptr<Matrix> editBigM = std::make_shared<Matrix>(*bigM);
     for (int col : ignoreCols)
       for (int row = 0; row < (*editBigM).getRows(); row++)
         (*editBigM)[row][col] = 0;
@@ -476,30 +476,16 @@ int Graph::getRowForEdit(std::shared_ptr<Matrix> M, int col,
 }
 
 StateSpaceSystem Graph::buildStateSpaceSystem() {
-  std::cout << std::endl << "------------------------------------" << std::endl;
   std::map<int, Component> dxdt;
   for (auto& [key, value] : stateVariables) dxdt[key + graphCount * 2] = value;
   std::map<int, Component> xt;
   for (auto& [key, value] : stateVariables) xt[key] = value;
   xt.insert(sourceVariables.begin(), sourceVariables.end());
-
   auto selectedDxDt = selectMatrix(dxdt, xt, {});
-  for (size_t i = 0; i < selectedDxDt.getRows(); ++i) {
-    for (size_t j = 0; j < selectedDxDt.getCols(); ++j)
-      std::cout << std::setw(6) << selectedDxDt[i][j];
-    std::cout << std::endl;
-  }
-  std::cout << "------------------------------------" << std::endl;
   std::vector<int> ignore;
   for (auto& [key, value] : stateVariables)
     ignore.push_back(key + graphCount * 2);
   auto selectedYt = selectMatrix(outputVariables, xt, ignore);
-  for (size_t i = 0; i < selectedYt.getRows(); ++i) {
-    for (size_t j = 0; j < selectedYt.getCols(); ++j)
-      std::cout << std::setw(6) << selectedYt[i][j];
-    std::cout << std::endl;
-  }
-  std::cout << "------------------------------------" << std::endl;
 
   StateSpaceSystem answer;
   answer.A =
@@ -530,7 +516,7 @@ StateSpaceSystem Graph::buildStateSpaceSystem() {
     }
     currentCol = 0;
     for (auto& [key, value] : sourceVariables) {
-      (*answer.D)[i][currentCol] = -selectedYt[i][key];
+      (*answer.D)[i][currentCol] = selectedYt[i][key];
       currentCol++;
     }
   }
@@ -554,8 +540,7 @@ std::vector<std::string> Graph::getX() {
 }
 std::vector<std::string> Graph::getY() {
   std::vector<std::string> answer;
-  for (auto& [key, component] : outputVariables) {
-    answer.push_back("I_"+component.name);
-  }
+  for (auto name : outputs)
+    answer.push_back("I_"+name);
   return answer;
 }

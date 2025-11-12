@@ -6,23 +6,28 @@
 #include <iostream>
 #include <iomanip>
 int main() {
+    double R1 = 1000.0;
+    double R2 = 2000.0;
+    double L = 0.1;
+    double C_val = 1e-6;
+    double J = 0.001;
 
     Circuit circuit;
     circuit.addBranch({
-        {"L", ComponentType::Inductor, 0.1, 0, 1},
-        {"R1", ComponentType::Resistor, 1000.0, 0, 1}
+        {"L", ComponentType::Inductor, L, 0, 1},
+        {"R1", ComponentType::Resistor, R1, 0, 1}
     });
     circuit.addBranch({
-        {"C",  ComponentType::Capacitor, 1e-6, 0, 1}
+        {"C",  ComponentType::Capacitor, C_val, 0, 1}
     });
     circuit.addBranch({
-        {"R2", ComponentType::Resistor, 2000.0, 0, 1}
+        {"R2", ComponentType::Resistor, R2, 0, 1}
     });
     circuit.addBranch({
-        {"J",  ComponentType::CurrentSource, 0.001, 1, 0},
+        {"J",  ComponentType::CurrentSource, J, 1, 0},
     });
 
-    std::vector<std::string> outputs = {"C", "R2"};
+    std::vector<std::string> outputs = {"R2", "C"};
 
     Graph graph(circuit, outputs);
     graph.printGraph();
@@ -30,40 +35,14 @@ int main() {
     graph.printChords();
     graph.printMatrixWithLabels();
     graph.printMSystem();
-    graph.printBigM();
+    //graph.printBigM();
     auto system = graph.buildStateSpaceSystem();
-    std::cout << (*system.A).toString() << std::endl;
-    std::cout << (*system.B).toString() << std::endl;
-    std::cout << (*system.C).toString() << std::endl;
-    std::cout << (*system.D).toString() << std::endl;
     std::cout << "------------------------------------" << std::endl;
-
-    double R1 = 1000.0;
-    double R2 = 2000.0;
-    double L = 0.1;
-    double C_val = 1e-6;
-    double J = 0.001;
-    
-    Matrix A(2, 2);
-    A[0][0] = -1.0/(C_val * R2); A[0][1] = -1.0/C_val;
-    A[1][0] = 1.0/L;             A[1][1] = -R1/L;
-
-    Matrix B(2, 1);
-    B[0][0] = 1.0/C_val;
-    B[1][0] = 0.0;
-    
-    Matrix C(2, 2);
-    C[0][0] = 1.0/R2;  C[0][1] = 0.0;
-    C[1][0] = -1.0/R2; C[1][1] = -1.0;
-    
-    Matrix D(2, 1);
-    D[0][0] = 0.0;
-    D[1][0] = 1.0;
-
-    std::cout << A.toString() << std::endl;
-    std::cout << B.toString() << std::endl;
-    std::cout << C.toString() << std::endl;
-    std::cout << D.toString() << std::endl;
+    std::cout << "Matrix A:\n" << (*system.A).toString() << std::endl;
+    std::cout << "Matrix B:\n" << (*system.B).toString() << std::endl;
+    std::cout << "Matrix C:\n" << (*system.C).toString() << std::endl;
+    std::cout << "Matrix D:\n" << (*system.D).toString() << std::endl;
+    std::cout << "------------------------------------" << std::endl;
     
     Matrix X0(2, 1);
     X0[0][0] = J * R2;
@@ -85,7 +64,7 @@ int main() {
     std::cout << "Step h = " << h << " s, modelling time T = " << T << " s" << std::endl;
     std::cout << std::endl;
     
-    auto results = EulerSolver::Solve((*system.A), (*system.B), C, D, X0, V, h, T);
+    auto results = EulerSolver::Solve((*system.A), (*system.B), (*system.C), (*system.D), X0, V, h, T);
     
     auto Xstring = graph.getX();
     auto Ystring = graph.getY();
