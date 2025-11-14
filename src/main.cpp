@@ -1,6 +1,7 @@
 #include <iomanip>
 #include <iostream>
 
+#include "Plot.h"
 #include "headers/Circuit.h"
 #include "headers/EulerSolver.h"
 #include "headers/Graph.h"
@@ -11,8 +12,14 @@
 
 using json = nlohmann::json;
 
-int main() {
-  JsonReader reader("/home/maksi/BasalinLab1/inputCircuit.json");
+int main(int argc, char* argv[]) {
+  if (argc < 2) {
+    std::cerr << "Usage: " << argv[0] << " <input_file.json>" << std::endl;
+    return 1;
+  }
+
+  JsonReader reader(
+      argv[1]);  // example /home/maksi/BasalinLab1/inputCircuit.json
   Circuit circuit = reader.getCircuit();
   std::vector<std::string> outputs = reader.getOutputs();
 
@@ -28,15 +35,20 @@ int main() {
   std::cout << "Matrix B:\n" << (*system.B).toString() << std::endl;
   std::cout << "Matrix C:\n" << (*system.C).toString() << std::endl;
   std::cout << "Matrix D:\n" << (*system.D).toString() << std::endl;
-  std::cout << "Matrix X0:\n" << (*system.X0).toString() << std::endl; // example U_C = 2.0, I_L = 0.0
-  std::cout << "Modeling time: " << system.T << " with step " << system.h << std::endl; // example T = 0.01, h = 1e-6
+  std::cout << "Matrix X0:\n"
+            << (*system.X0).toString()
+            << std::endl;  // example U_C = 2.0, I_L = 0.0
+  std::cout << "Modeling time: " << system.T << " with step " << system.h
+            << std::endl;  // example T = 0.01, h = 1e-6
   std::cout << "------------------------------------" << std::endl;
 
-  auto results = EulerSolver::Solve((*system.A), (*system.B), (*system.C),
-                                    (*system.D), (*system.X0), (*system.V), system.h, system.T);
+  auto results =
+      EulerSolver::Solve((*system.A), (*system.B), (*system.C), (*system.D),
+                         (*system.X0), (*system.V), system.h, system.T);
 
   auto Xstring = graph.getX();
   auto Ystring = graph.getY();
   EulerSolver::PrintResults(results, Xstring, Ystring);
+  Plot(results, Xstring, Ystring).plotResults();
   return 0;
 }
