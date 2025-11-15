@@ -31,7 +31,6 @@ Graph::Graph(Circuit circuit, std::vector<std::string> outputs) {
         } else {
           nodeVertices += 1;
           nextVertex = nodeVertices;
-          std::cout << "nextVertex: " << nextVertex << std::endl;
           vertices.insert(nextVertex);
           graph[nextVertex] = std::vector<std::pair<int, Component>>();
         }
