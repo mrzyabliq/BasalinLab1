@@ -8,8 +8,7 @@ Graph::Graph(Circuit circuit, std::vector<std::string> outputs) {
       vertices.insert(comp.terminalOut);
     }
   }
-  nodeVertices = vertices.size();
-  numVertices = nodeVertices;
+  nodeVertices = vertices.size() - 1;
 
   for (int vertex : vertices)
     graph[vertex] = std::vector<std::pair<int, Component>>();
@@ -30,7 +29,9 @@ Graph::Graph(Circuit circuit, std::vector<std::string> outputs) {
         if (i == branch.size() - 1) {
           nextVertex = comp.terminalOut;
         } else {
-          nextVertex = nodeVertices + i;
+          nodeVertices += 1;
+          nextVertex = nodeVertices;
+          std::cout << "nextVertex: " << nextVertex << std::endl;
           vertices.insert(nextVertex);
           graph[nextVertex] = std::vector<std::pair<int, Component>>();
         }
@@ -41,8 +42,6 @@ Graph::Graph(Circuit circuit, std::vector<std::string> outputs) {
       }
     }
   }
-
-  numVertices = vertices.size();
 
   selectTree();
   buildMatrix();
@@ -325,9 +324,6 @@ std::map<std::string, int> Graph::getColsDict() {
 
 void Graph::buildBigMatrix() {
   auto compToInd = getColsDict();
-  std::vector<Component> resistors;
-  std::vector<Component> capacitors;
-  std::vector<Component> inductors;
   for (auto& [key, vec] : graph) {
     for (auto& [first, component] : vec) {
       switch (component.type) {
@@ -362,6 +358,7 @@ void Graph::buildBigMatrix() {
         treeIndex++;
       }
     }
+    rowsNames.push_back(chords[i].second.name);
     currentRow++;
   }
 
@@ -375,6 +372,7 @@ void Graph::buildBigMatrix() {
               (*M)[i][treeIndex];
         }
       }
+      rowsNames.push_back(component.name);
       currentRow++;
       treeIndex++;
     }
@@ -383,18 +381,21 @@ void Graph::buildBigMatrix() {
   for (auto resistor : resistors) {
     (*bigM)[currentRow][compToInd["U_" + resistor.name]] = -1;
     (*bigM)[currentRow][compToInd["I_" + resistor.name]] = resistor.value;
+    rowsNames.push_back(resistor.name);
     currentRow++;
   }
   for (auto capacitor : capacitors) {
     (*bigM)[currentRow][compToInd["I_" + capacitor.name]] = -1;
     (*bigM)[currentRow][compToInd["dU_" + capacitor.name + "/dt"]] =
         capacitor.value;
+    rowsNames.push_back(capacitor.name);
     currentRow++;
   }
   for (auto inductor : inductors) {
     (*bigM)[currentRow][compToInd["U_" + inductor.name]] = -1;
     (*bigM)[currentRow][compToInd["dI_" + inductor.name + "/dt"]] =
         inductor.value;
+    rowsNames.push_back(inductor.name);
     currentRow++;
   }
 }
@@ -420,7 +421,7 @@ Matrix Graph::selectMatrix(std::map<int, Component> toFind,
         (*editBigM)[row][col] = 0;
     int workRow = -1;
     for (int i = 0; i < (*editBigM).getRows(); i++)
-      if ((*editBigM)[i][key] != 0) {
+      if ((*editBigM)[i][key] != 0 && value.name == rowsNames[i]) {
         workRow = i;
         break;
       }
@@ -428,6 +429,8 @@ Matrix Graph::selectMatrix(std::map<int, Component> toFind,
     int colToEdit = getColToEdit(editBigM, workRow, key, toHelp);
     while (colToEdit != -1 && usedRows.size() < (*editBigM).getRows() - 1) {
       int rowForEdit = getRowForEdit(editBigM, colToEdit, usedRows);
+      if (rowForEdit == -1)
+        rowForEdit = getRandomRowForEdit(editBigM, colToEdit, workRow);
       double coef =
           (*editBigM)[workRow][colToEdit] / (*editBigM)[rowForEdit][colToEdit];
       for (int i = 0; i < (*editBigM).getCols(); i++)
@@ -456,6 +459,15 @@ int Graph::getRowForEdit(std::shared_ptr<Matrix> M, int col,
   for (int i = 0; i < (*M).getRows(); i++)
     if (!contains(usedRows, i) && (*M)[i][col] != 0) return i;
   return -1;
+}
+int Graph::getRandomRowForEdit(std::shared_ptr<Matrix> M, int col,
+                               int workRow) {
+  std::srand(std::time(0));
+  std::vector<int> potentialRows;
+  for (int i = 0; i < (*M).getRows(); i++)
+    if (i != workRow && (*M)[i][col] != 0) potentialRows.push_back(i);
+  if (potentialRows.empty()) return -1;
+  return potentialRows[std::rand() % potentialRows.size()];
 }
 
 StateSpaceSystem Graph::buildStateSpaceSystem() {
@@ -507,15 +519,18 @@ StateSpaceSystem Graph::buildStateSpaceSystem() {
   }
 
   int VIndex = 0;
-  for (auto& [key, value] : sourceVariables){
+  for (auto& [key, value] : sourceVariables) {
     double sourceValue = value.value;
-    (*answer.V).setFunction(0, VIndex, [sourceValue](double t) -> double { return sourceValue; });
+    (*answer.V).setFunction(
+        0, VIndex, [sourceValue](double t) -> double { return sourceValue; });
     VIndex++;
   }
 
   int X0Index = 0;
-  for (auto& [key, value] : stateVariables){
-    std::string variableName = (value.type == ComponentType::Inductor) ? "I_" + value.name : "U_" + value.name;
+  for (auto& [key, value] : stateVariables) {
+    std::string variableName = (value.type == ComponentType::Inductor)
+                                   ? "I_" + value.name
+                                   : "U_" + value.name;
     double varValue;
     std::cout << "Input start " << variableName << ": ";
     std::cin >> varValue;
@@ -534,21 +549,20 @@ std::vector<std::string> Graph::getX() {
   std::vector<std::string> answer;
   for (auto& [key, component] : stateVariables) {
     switch (component.type) {
-        case ComponentType::Capacitor:
-          answer.push_back("U_"+component.name);
-          break;
-        case ComponentType::Inductor:
-          answer.push_back("I_"+component.name);
-          break;
-        default:
-          break;
+      case ComponentType::Capacitor:
+        answer.push_back("U_" + component.name);
+        break;
+      case ComponentType::Inductor:
+        answer.push_back("I_" + component.name);
+        break;
+      default:
+        break;
     }
   }
   return answer;
 }
 std::vector<std::string> Graph::getY() {
   std::vector<std::string> answer;
-  for (auto name : outputs)
-    answer.push_back("I_"+name);
+  for (auto name : outputs) answer.push_back("I_" + name);
   return answer;
 }

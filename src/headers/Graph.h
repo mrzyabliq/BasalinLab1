@@ -10,6 +10,8 @@
 #include <set>
 #include <utility>
 #include <vector>
+#include <cstdlib>
+#include <ctime>
 
 #include "Circuit.h"
 #include "Component.h"
@@ -59,11 +61,15 @@ class Graph {
                    std::map<int, Component> cols);
   int getRowForEdit(std::shared_ptr<Matrix> M, int col,
                     std::vector<int> usedRows);
-
+  int getRandomRowForEdit(std::shared_ptr<Matrix> M, int col, int workRow);
 
   std::map<int, Component> stateVariables;
   std::map<int, Component> outputVariables;
   std::map<int, Component> sourceVariables;
+  std::vector<Component> resistors;
+  std::vector<Component> capacitors;
+  std::vector<Component> inductors;
+  std::vector<std::string> rowsNames;
 
   int graphCount;
 public:

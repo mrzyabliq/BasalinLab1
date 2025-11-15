@@ -18,8 +18,7 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  JsonReader reader(
-      argv[1]);  // example /home/maksi/BasalinLab1/inputCircuit.json
+  JsonReader reader(argv[1]);  // example /home/maksi/BasalinLab1/inputCircuit.json
   Circuit circuit = reader.getCircuit();
   std::vector<std::string> outputs = reader.getOutputs();
 
