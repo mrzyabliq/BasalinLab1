@@ -1,0 +1,48 @@
+{
+    "branches": [
+        [
+            {
+                "name": "L",
+                "type": "Inductor",
+                "value": 0.1,
+                "terminalIn": 0,
+                "terminalOut": 1
+            },
+            {
+                "name": "R1",
+                "type": "Resistor", 
+                "value": 1000.0,
+                "terminalIn": 0,
+                "terminalOut": 1
+            }
+        ],
+        [
+            {
+                "name": "C",
+                "type": "Capacitor",
+                "value": 0.000001,
+                "terminalIn": 0, 
+                "terminalOut": 1
+            }
+        ],
+        [
+            {
+                "name": "R2",
+                "type": "Resistor",
+                "value": 2000.0,
+                "terminalIn": 0,
+                "terminalOut": 1
+            }
+        ],
+        [
+            {
+                "name": "J",
+                "type": "CurrentSource",
+                "value": 0.001,
+                "terminalIn": 1,
+                "terminalOut": 0
+            }
+        ]
+    ],
+    "outputs": ["R2", "C"]
+}

@@ -1,0 +1,46 @@
+{
+    "branches": [
+        [
+            {
+                "name": "L",
+                "type": "Inductor",
+                "value": 0.8,
+                "terminalIn": 0,
+                "terminalOut": 1
+            },
+            {
+                "name": "R2",
+                "type": "Resistor", 
+                "value": 5.0,
+                "terminalIn": 0,
+                "terminalOut": 1
+            }
+        ],
+        [
+            {
+                "name": "C",
+                "type": "Capacitor",
+                "value": 0.5,
+                "terminalIn": 0, 
+                "terminalOut": 1
+            }
+        ],
+        [
+            {
+                "name": "Г",
+                "type": "VoltageSource",
+                "value": 1.2,
+                "terminalIn": 1,
+                "terminalOut": 0
+            },
+            {
+                "name": "R1",
+                "type": "Resistor",
+                "value": 7.0,
+                "terminalIn": 1,
+                "terminalOut": 0
+            }
+        ]
+    ],
+    "outputs": ["R1", "C"]
+}

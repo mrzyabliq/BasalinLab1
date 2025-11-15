@@ -16,5 +16,7 @@ class Matrix {
     Matrix operator+(const Matrix& other) const;
     std::vector<double> EigenValues();
     std::string toString();
+    size_t getCols(){ return cols; };
+    size_t getRows(){ return rows; };
 };
 #endif // MATRIX_H
