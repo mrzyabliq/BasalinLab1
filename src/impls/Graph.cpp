@@ -304,8 +304,10 @@ std::map<std::string, int> Graph::getColsDict() {
         stateVariables[treeIndex] = component;
       if (component.type == ComponentType::Inductor)
         stateVariables[treeIndex + graphCount] = component;
-      if (contains(outputs, component.name))
+      if (contains(outputs, "I_" + component.name))
         outputVariables[treeIndex + graphCount] = component;
+      if (contains(outputs, "U_" + component.name))
+        outputVariables[treeIndex] = component;
       if (component.type == ComponentType::CurrentSource)
         sourceVariables[treeIndex + graphCount] = component;
       if (component.type == ComponentType::VoltageSource)

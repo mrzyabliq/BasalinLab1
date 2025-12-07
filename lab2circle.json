@@ -1,0 +1,84 @@
+{
+    "branches": [
+        [
+            {
+                "name": "Uzi",
+                "type": "VoltageSource",
+                "value": 1,
+                "terminalIn": 2,
+                "terminalOut": 0
+            }
+        ],
+        [
+            {
+                "name": "Czi",
+                "type": "Capacitor",
+                "value": 0.1,
+                "terminalIn": 0, 
+                "terminalOut": 2
+            }
+        ],
+        [
+            {
+                "name": "Csi",
+                "type": "Capacitor",
+                "value": 0.1,
+                "terminalIn": 1, 
+                "terminalOut": 2
+            }
+        ],
+        [
+            {
+                "name": "Czc",
+                "type": "Capacitor",
+                "value": 0.1,
+                "terminalIn": 1, 
+                "terminalOut": 0
+            }
+        ],
+        [
+            {
+                "name": "Jzi",
+                "type": "CurrentSource",
+                "value": 0.1,
+                "terminalIn": 1,
+                "terminalOut": 2
+            }
+        ],
+        [
+            {
+                "name": "Rsi",
+                "type": "Resistor",
+                "value": 2.0,
+                "terminalIn": 1,
+                "terminalOut": 2
+            }
+        ],
+        [
+            {
+                "name": "R",
+                "type": "Resistor",
+                "value": 2.0,
+                "terminalIn": 1,
+                "terminalOut": 2
+            },
+            {
+                "name": "Up",
+                "type": "VoltageSource",
+                "value": 1.0,
+                "terminalIn": 1,
+                "terminalOut": 2
+            }
+        ],
+        [
+            {
+                "name": "Cn",
+                "type": "Capacitor",
+                "value": 0.1,
+                "terminalIn": 1, 
+                "terminalOut": 2
+            }
+        ]
+    ],
+    "outputs": ["U_Cn"]
+}

@@ -44,5 +44,5 @@
             }
         ]
     ],
-    "outputs": ["R2", "C"]
+    "outputs": ["I_R2", "I_C"]
 }
