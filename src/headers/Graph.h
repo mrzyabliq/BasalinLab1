@@ -2,6 +2,8 @@
 #define GRAPH_H
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
+#include <ctime>
 #include <iomanip>
 #include <iostream>
 #include <map>
@@ -10,8 +12,6 @@
 #include <set>
 #include <utility>
 #include <vector>
-#include <cstdlib>
-#include <ctime>
 
 #include "Circuit.h"
 #include "Component.h"
@@ -41,6 +41,7 @@ class Graph {
   std::shared_ptr<Matrix> M;
   std::shared_ptr<Matrix> bigM;
   std::vector<std::string> outputs;
+  std::vector<std::string> states;
 
   template <typename T>
   bool contains(const std::vector<T>& vec, const T& value) {
@@ -61,7 +62,12 @@ class Graph {
                    std::map<int, Component> cols);
   int getRowForEdit(std::shared_ptr<Matrix> M, int col,
                     std::vector<int> usedRows);
-  int getRandomRowForEdit(std::shared_ptr<Matrix> M, int col, int workRow);
+  int getRandomColToEdit(std::shared_ptr<Matrix> M, int row, int col,
+                         std::map<int, Component> cols);
+  bool checkRowBadColumns(std::shared_ptr<Matrix> M, std::vector<int> cols,
+                          int row, int targetCol, int col);
+  int getRandomRowForEdit(std::shared_ptr<Matrix> M, int col, int workRow,
+                          std::vector<int> toHelpCols, int targetCol);
 
   std::map<int, Component> stateVariables;
   std::map<int, Component> outputVariables;
@@ -69,11 +75,14 @@ class Graph {
   std::vector<Component> resistors;
   std::vector<Component> capacitors;
   std::vector<Component> inductors;
+  std::vector<Component> voltageSources;
   std::vector<std::string> rowsNames;
 
   int graphCount;
-public:
-  Graph(Circuit circuit, std::vector<std::string> outputs);
+
+ public:
+  Graph(Circuit circuit, std::vector<std::string> outputs,
+        std::vector<std::string> states);
   void printTree();
   void printChords();
   void printGraph();
