@@ -62,8 +62,6 @@ class Graph {
                    std::map<int, Component> cols);
   int getRowForEdit(std::shared_ptr<Matrix> M, int col,
                     std::vector<int> usedRows);
-  int getRandomColToEdit(std::shared_ptr<Matrix> M, int row, int col,
-                         std::map<int, Component> cols);
   bool checkRowBadColumns(std::shared_ptr<Matrix> M, std::vector<int> cols,
                           int row, int targetCol, int col);
   int getRandomRowForEdit(std::shared_ptr<Matrix> M, int col, int workRow,

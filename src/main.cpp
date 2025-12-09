@@ -18,9 +18,7 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  JsonReader reader(argv[1]);  // example /home/maksi/BasalinLab1/inputCircuit.json
-  // JsonReader reader("../lab2circle.json");
-  // JsonReader reader("../variantCircuit.json");
+  JsonReader reader(argv[1]);  // example ../inputCircuit.json
   Circuit circuit = reader.getCircuit();
   std::vector<std::string> outputs = reader.getOutputs();
   std::vector<std::string> states = reader.getStateVars();
@@ -43,12 +41,6 @@ int main(int argc, char* argv[]) {
   std::cout << "Modeling time: " << system.T << " with step " << system.h
             << std::endl;  // example T = 0.01, h = 1e-6
   std::cout << "------------------------------------" << std::endl;
-  // Matrix A(1, 1);
-  //   A[0][0] = -0.37037;
-  // Matrix B(1, 3);
-  //   B[0][0] = -0;
-  //   B[0][1] = 0.222222;
-  //   B[0][2] = -2.222222;
 
   auto results =
       EulerSolver::Solve((*system.A), (*system.B), (*system.C), (*system.D),

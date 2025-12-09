@@ -1,6 +1,7 @@
 #include "Graph.h"
 
-Graph::Graph(Circuit circuit, std::vector<std::string> outputs, std::vector<std::string> states) {
+Graph::Graph(Circuit circuit, std::vector<std::string> outputs,
+             std::vector<std::string> states) {
   this->outputs = outputs;
   this->states = states;
   for (auto branch : circuit.components) {
@@ -326,9 +327,6 @@ std::map<std::string, int> Graph::getColsDict() {
 
 void Graph::buildBigMatrix() {
   auto compToInd = getColsDict();
-  for (const auto& pair : compToInd){
-      std::cout << pair.first << ": " << pair.second << std::endl;
-  }
   for (auto& [key, vec] : graph) {
     for (auto& [first, component] : vec) {
       switch (component.type) {
@@ -427,10 +425,6 @@ void Graph::buildBigMatrix() {
     rowsNames.push_back(voltage.name);
     currentRow++;
   }
-
-  for (int i = 0; i < rowsNames.size(); i++)
-    std::cout << i << ") " << rowsNames[i] << std::endl;
-  
 }
 
 void Graph::printBigM() {
@@ -451,7 +445,7 @@ Matrix Graph::selectMatrix(std::map<int, Component> toFind,
   std::vector<int> toHelpInt;
 
   for (const auto& [key, value] : toHelp) {
-      toHelpInt.push_back(key);
+    toHelpInt.push_back(key);
   }
 
   for (auto& [key, value] : toFind) {
@@ -466,25 +460,19 @@ Matrix Graph::selectMatrix(std::map<int, Component> toFind,
       }
     std::vector<int> usedRows = {workRow};
     int colToEdit = getColToEdit(editBigM, workRow, key, toHelp);
-    std::cout << "workRow: "<< workRow<< std::endl;
     while (colToEdit != -1 && usedRows.size() < (*editBigM).getRows() - 1) {
       int rowForEdit = getRowForEdit(editBigM, colToEdit, usedRows);
-      if (rowForEdit == -1){
-        std::cout << "============================== popal in -1 ==============================" << std::endl;
-        rowForEdit = getRandomRowForEdit(editBigM, colToEdit, workRow, toHelpInt, key);
-        std::cout << "random row: "<< rowForEdit << " col to edit: " << colToEdit << std::endl;
-        std::cout << "=========================================================================" << std::endl;
-      }
-      std::cout << "row for edit: "<< rowForEdit << std::endl;
+      if (rowForEdit == -1)
+        rowForEdit =
+            getRandomRowForEdit(editBigM, colToEdit, workRow, toHelpInt, key);
       double coef =
           (*editBigM)[workRow][colToEdit] / (*editBigM)[rowForEdit][colToEdit];
-      if(coef * (*editBigM)[rowForEdit][key] - (*editBigM)[workRow][key] == 0)
+      if (coef * (*editBigM)[rowForEdit][key] - (*editBigM)[workRow][key] == 0)
         continue;
       for (int i = 0; i < (*editBigM).getCols(); i++)
         (*editBigM)[workRow][i] -= (*editBigM)[rowForEdit][i] * coef;
       usedRows.push_back(rowForEdit);
       colToEdit = getColToEdit(editBigM, workRow, key, toHelp);
-      std::cout << "target cell: " << (*editBigM)[workRow][colToEdit] << std::endl;
     }
 
     for (int i = 0; i < (*editBigM).getCols(); i++) {
@@ -502,20 +490,18 @@ int Graph::getColToEdit(std::shared_ptr<Matrix> M, int row, int col,
     if (i != col && cols.count(i) == 0 && (*M)[row][i] != 0) return i;
   return -1;
 }
-bool Graph::checkRowBadColumns(std::shared_ptr<Matrix> M, std::vector<int> cols, int row, int targetCol, int col){
-  for (int i = 0; i < (*M).getCols(); i++){
-    if (contains(cols, i) || i == targetCol || i == col)
-      continue;
-    if ((*M)[row][i] == 0.0)
-      continue;
+bool Graph::checkRowBadColumns(std::shared_ptr<Matrix> M, std::vector<int> cols,
+                               int row, int targetCol, int col) {
+  for (int i = 0; i < (*M).getCols(); i++) {
+    if (contains(cols, i) || i == targetCol || i == col) continue;
+    if ((*M)[row][i] == 0.0) continue;
     int nonZero = 0;
-    for (int j = 0; i < (*M).getRows(); i++)
-      if ((*M)[j][i] != 0.0){
+    for (int j = 0; j < (*M).getRows(); j++)
+      if ((*M)[j][i] != 0.0) {
         nonZero++;
         if (nonZero > 1) break;
       }
-    if (nonZero == 1)
-      return false;
+    if (nonZero == 1) return false;
   }
   return true;
 }
@@ -525,18 +511,16 @@ int Graph::getRowForEdit(std::shared_ptr<Matrix> M, int col,
     if (!contains(usedRows, i) && (*M)[i][col] != 0) return i;
   return -1;
 }
-int Graph::getRandomRowForEdit(std::shared_ptr<Matrix> M, int col,
-                               int workRow, std::vector<int> toHelpCols, int targetCol) {
+int Graph::getRandomRowForEdit(std::shared_ptr<Matrix> M, int col, int workRow,
+                               std::vector<int> toHelpCols, int targetCol) {
   std::srand(std::time(0));
   std::vector<int> potentialRows;
   for (int i = 0; i < (*M).getRows(); i++)
-    if (i != workRow && (*M)[i][col] != 0 && checkRowBadColumns(M, toHelpCols, i, targetCol, col)) potentialRows.push_back(i);
+    if (i != workRow && (*M)[i][col] != 0 &&
+        checkRowBadColumns(M, toHelpCols, i, targetCol, col))
+      potentialRows.push_back(i);
   if (potentialRows.empty()) return -1;
-  std::cout << "potential rows:" << std::endl;
-  for (auto i: potentialRows)
-    std::cout << i << " ";
-  std::cout << std::endl;
-  
+
   return potentialRows[std::rand() % potentialRows.size()];
 }
 
@@ -591,7 +575,6 @@ StateSpaceSystem Graph::buildStateSpaceSystem() {
   int VIndex = 0;
   for (auto& [key, value] : sourceVariables) {
     double sourceValue = value.value;
-    std::cout << "source value " << value.name << " " << value.value << std::endl;
     (*answer.V).setFunction(
         VIndex, 0, [sourceValue](double t) -> double { return sourceValue; });
     VIndex++;

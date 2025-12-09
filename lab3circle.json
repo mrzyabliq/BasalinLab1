@@ -2,6 +2,27 @@
     "branches": [
         [
             {
+                "name": "Czi3",
+                "type": "Capacitor",
+                "value": 0.18,
+                "terminalIn": 0, 
+                "terminalOut": 2
+            },
+            {
+                "name": "Csi3",
+                "type": "Capacitor",
+                "value": 0.18,
+                "terminalIn": 0, 
+                "terminalOut": 2
+            },
+            {
+                "name": "Jczi3",
+                "type": "CurrentSource",
+                "value": 1,
+                "terminalIn": 1,
+                "terminalOut": 2
+            },
+            {
                 "name": "Uzi",
                 "type": "VoltageSource",
                 "value": 50,
@@ -81,5 +102,6 @@
         ]
     ],
     "stateVars": ["U_Csi"],
-    "outputs": ["U_Cn"]
+    "outputs": ["U_Cn"],
+    "active": ["Uzi"]
 }
