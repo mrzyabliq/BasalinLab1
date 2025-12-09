@@ -18,11 +18,12 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  JsonReader reader(argv[1]);  // example /home/maksi/BasalinLab1/inputCircuit.json
+  JsonReader reader(argv[1]);  // example ../inputCircuit.json
   Circuit circuit = reader.getCircuit();
   std::vector<std::string> outputs = reader.getOutputs();
+  std::vector<std::string> states = reader.getStateVars();
 
-  Graph graph(circuit, outputs);
+  Graph graph(circuit, outputs, states);
   graph.printGraph();
   graph.printTree();
   graph.printChords();

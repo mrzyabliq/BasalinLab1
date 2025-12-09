@@ -11,6 +11,7 @@ bool JsonReader::loadFromFile(std::string file_path) {
     json config = json::parse(config_file);
     parseCircuit(config);
     parseOutputs(config);
+    parseStateVars(config);
     std::cout << "Circuit configuration loaded successfully!" << std::endl;
     return true;
   } catch (std::exception e) {
@@ -55,4 +56,8 @@ void JsonReader::parseCircuit(json config) {
 
 void JsonReader::parseOutputs(json config) {
   outputs_ = config["outputs"].get<std::vector<std::string>>();
+}
+
+void JsonReader::parseStateVars(json config) {
+  stateVars_ = config["stateVars"].get<std::vector<std::string>>();
 }

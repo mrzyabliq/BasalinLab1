@@ -42,5 +42,6 @@
             }
         ]
     ],
+    "stateVars": ["U_C", "I_L"],
     "outputs": ["I_R1", "I_C"]
 }

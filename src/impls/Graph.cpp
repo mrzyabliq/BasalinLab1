@@ -1,7 +1,9 @@
 #include "Graph.h"
 
-Graph::Graph(Circuit circuit, std::vector<std::string> outputs) {
+Graph::Graph(Circuit circuit, std::vector<std::string> outputs,
+             std::vector<std::string> states) {
   this->outputs = outputs;
+  this->states = states;
   for (auto branch : circuit.components) {
     for (auto comp : branch) {
       vertices.insert(comp.terminalIn);
@@ -300,9 +302,9 @@ std::map<std::string, int> Graph::getColsDict() {
   int treeIndex = 0;
   for (auto& [key, vec] : graph) {
     for (auto& [first, component] : vec) {
-      if (component.type == ComponentType::Capacitor)
+      if (contains(states, "U_" + component.name))
         stateVariables[treeIndex] = component;
-      if (component.type == ComponentType::Inductor)
+      if (contains(states, "I_" + component.name))
         stateVariables[treeIndex + graphCount] = component;
       if (contains(outputs, "I_" + component.name))
         outputVariables[treeIndex + graphCount] = component;
@@ -337,13 +339,16 @@ void Graph::buildBigMatrix() {
         case ComponentType::Inductor:
           inductors.push_back(component);
           break;
+        case ComponentType::VoltageSource:
+          voltageSources.push_back(component);
+          break;
         default:
           break;
       }
     }
   }
-  int rowsCount = M->getRows() + M->getCols() + resistors.size() +
-                  capacitors.size() + inductors.size();
+  int rowsCount = M->getRows() * 2 + M->getCols() + resistors.size() +
+                  capacitors.size() + inductors.size() + voltageSources.size();
   bigM = std::make_shared<Matrix>(rowsCount, compToInd.size());
 
   int currentRow = 0;
@@ -354,6 +359,22 @@ void Graph::buildBigMatrix() {
       for (auto& [first, component] : vec) {
         if ((*M)[i][treeIndex] != 0.0) {
           (*bigM)[currentRow][compToInd["U_" + component.name]] =
+              -(*M)[i][treeIndex];
+        }
+        treeIndex++;
+      }
+    }
+    rowsNames.push_back(chords[i].second.name);
+    currentRow++;
+  }
+
+  for (int i = 0; i < chords.size(); i++) {
+    (*bigM)[currentRow][compToInd["dU_" + chords[i].second.name + "/dt"]] = -1;
+    int treeIndex = 0;
+    for (auto& [key, vec] : tree) {
+      for (auto& [first, component] : vec) {
+        if ((*M)[i][treeIndex] != 0.0) {
+          (*bigM)[currentRow][compToInd["dU_" + component.name + "/dt"]] =
               -(*M)[i][treeIndex];
         }
         treeIndex++;
@@ -399,6 +420,11 @@ void Graph::buildBigMatrix() {
     rowsNames.push_back(inductor.name);
     currentRow++;
   }
+  for (auto voltage : voltageSources) {
+    (*bigM)[currentRow][compToInd["dU_" + voltage.name + "/dt"]] = 1;
+    rowsNames.push_back(voltage.name);
+    currentRow++;
+  }
 }
 
 void Graph::printBigM() {
@@ -416,6 +442,12 @@ Matrix Graph::selectMatrix(std::map<int, Component> toFind,
   int ansIdx = 0;
   std::shared_ptr<Matrix> editBigM = std::make_shared<Matrix>(*bigM);
 
+  std::vector<int> toHelpInt;
+
+  for (const auto& [key, value] : toHelp) {
+    toHelpInt.push_back(key);
+  }
+
   for (auto& [key, value] : toFind) {
     for (int col : ignoreCols)
       for (int row = 0; row < (*editBigM).getRows(); row++)
@@ -431,9 +463,12 @@ Matrix Graph::selectMatrix(std::map<int, Component> toFind,
     while (colToEdit != -1 && usedRows.size() < (*editBigM).getRows() - 1) {
       int rowForEdit = getRowForEdit(editBigM, colToEdit, usedRows);
       if (rowForEdit == -1)
-        rowForEdit = getRandomRowForEdit(editBigM, colToEdit, workRow);
+        rowForEdit =
+            getRandomRowForEdit(editBigM, colToEdit, workRow, toHelpInt, key);
       double coef =
           (*editBigM)[workRow][colToEdit] / (*editBigM)[rowForEdit][colToEdit];
+      if (coef * (*editBigM)[rowForEdit][key] - (*editBigM)[workRow][key] == 0)
+        continue;
       for (int i = 0; i < (*editBigM).getCols(); i++)
         (*editBigM)[workRow][i] -= (*editBigM)[rowForEdit][i] * coef;
       usedRows.push_back(rowForEdit);
@@ -455,19 +490,37 @@ int Graph::getColToEdit(std::shared_ptr<Matrix> M, int row, int col,
     if (i != col && cols.count(i) == 0 && (*M)[row][i] != 0) return i;
   return -1;
 }
+bool Graph::checkRowBadColumns(std::shared_ptr<Matrix> M, std::vector<int> cols,
+                               int row, int targetCol, int col) {
+  for (int i = 0; i < (*M).getCols(); i++) {
+    if (contains(cols, i) || i == targetCol || i == col) continue;
+    if ((*M)[row][i] == 0.0) continue;
+    int nonZero = 0;
+    for (int j = 0; j < (*M).getRows(); j++)
+      if ((*M)[j][i] != 0.0) {
+        nonZero++;
+        if (nonZero > 1) break;
+      }
+    if (nonZero == 1) return false;
+  }
+  return true;
+}
 int Graph::getRowForEdit(std::shared_ptr<Matrix> M, int col,
                          std::vector<int> usedRows) {
   for (int i = 0; i < (*M).getRows(); i++)
     if (!contains(usedRows, i) && (*M)[i][col] != 0) return i;
   return -1;
 }
-int Graph::getRandomRowForEdit(std::shared_ptr<Matrix> M, int col,
-                               int workRow) {
+int Graph::getRandomRowForEdit(std::shared_ptr<Matrix> M, int col, int workRow,
+                               std::vector<int> toHelpCols, int targetCol) {
   std::srand(std::time(0));
   std::vector<int> potentialRows;
   for (int i = 0; i < (*M).getRows(); i++)
-    if (i != workRow && (*M)[i][col] != 0) potentialRows.push_back(i);
+    if (i != workRow && (*M)[i][col] != 0 &&
+        checkRowBadColumns(M, toHelpCols, i, targetCol, col))
+      potentialRows.push_back(i);
   if (potentialRows.empty()) return -1;
+
   return potentialRows[std::rand() % potentialRows.size()];
 }
 
@@ -492,7 +545,7 @@ StateSpaceSystem Graph::buildStateSpaceSystem() {
       std::make_shared<Matrix>(stateVariables.size(), stateVariables.size());
   answer.D =
       std::make_shared<Matrix>(stateVariables.size(), sourceVariables.size());
-  answer.V = std::make_shared<VMatrix>(1, sourceVariables.size());
+  answer.V = std::make_shared<VMatrix>(sourceVariables.size(), 1);
   answer.X0 = std::make_shared<Matrix>(stateVariables.size(), 1);
   for (int i = 0; i < stateVariables.size(); i++) {
     int currentCol = 0;
@@ -523,7 +576,7 @@ StateSpaceSystem Graph::buildStateSpaceSystem() {
   for (auto& [key, value] : sourceVariables) {
     double sourceValue = value.value;
     (*answer.V).setFunction(
-        0, VIndex, [sourceValue](double t) -> double { return sourceValue; });
+        VIndex, 0, [sourceValue](double t) -> double { return sourceValue; });
     VIndex++;
   }
 
@@ -564,6 +617,6 @@ std::vector<std::string> Graph::getX() {
 }
 std::vector<std::string> Graph::getY() {
   std::vector<std::string> answer;
-  for (auto name : outputs) answer.push_back("I_" + name);
+  for (auto name : outputs) answer.push_back(name);
   return answer;
 }
