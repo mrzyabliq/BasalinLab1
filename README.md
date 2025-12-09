@@ -108,6 +108,7 @@ make
             }
         ]
     ],
+    "stateVars": ["U_C", "I_L"],
     "outputs": ["I_R2", "I_C"]
 }
 ```
@@ -166,6 +167,7 @@ make
             }
         ]
     ],
+    "stateVars": ["U_C", "I_L"],
     "outputs": ["I_R1", "I_C"]
 }
 ```
