@@ -4,8 +4,8 @@
             {
                 "name": "Uzi1",
                 "type": "VoltageSource",
-                "value": 30,
-                "terminalIn": 0, 
+                "value": 0,
+                "terminalIn": 2, 
                 "terminalOut": 1
             }
         ],
@@ -14,7 +14,7 @@
                 "name": "Up",
                 "type": "VoltageSource",
                 "value": 30,
-                "terminalIn": 0,
+                "terminalIn": 2,
                 "terminalOut": 5
             }
         ],
@@ -23,8 +23,8 @@
                 "name": "Csi1",
                 "type": "Capacitor",
                 "value": 0.15,
-                "terminalIn": 2,
-                "terminalOut": 0
+                "terminalIn": 0,
+                "terminalOut": 2
             }
         ],
         [
@@ -32,17 +32,17 @@
                 "name": "Csi2",
                 "type": "Capacitor",
                 "value": 0.15,
-                "terminalIn": 4, 
-                "terminalOut": 2
+                "terminalIn": 3, 
+                "terminalOut": 0
             }
         ],
         [
             {
                 "name": "Uzi2",
                 "type": "VoltageSource",
-                "value": 50,
-                "terminalIn": 2,
-                "terminalOut": 3
+                "value": 0,
+                "terminalIn": 0,
+                "terminalOut": 4
             }
         ],
         [
@@ -51,7 +51,7 @@
                 "type": "Capacitor",
                 "value": 0.18,
                 "terminalIn": 5, 
-                "terminalOut": 4
+                "terminalOut": 3
             }
         ],
         [
@@ -60,7 +60,7 @@
                 "type": "Capacitor",
                 "value": 0.18,
                 "terminalIn": 5, 
-                "terminalOut": 4
+                "terminalOut": 3
             }
         ],
         [
@@ -69,16 +69,16 @@
                 "type": "CurrentSource",
                 "value": 1,
                 "terminalIn": 5,
-                "terminalOut": 4
+                "terminalOut": 3
             }
         ],
         [
             {
                 "name": "Jzi2",
                 "type": "CurrentSource",
-                "value": 1,
-                "terminalIn": 4,
-                "terminalOut": 2
+                "value": 0,
+                "terminalIn": 3,
+                "terminalOut": 0
             }
         ],
         [
@@ -86,17 +86,17 @@
                 "name": "Czi2",
                 "type": "Capacitor",
                 "value": 0.15,
-                "terminalIn": 3,
-                "terminalOut": 2
+                "terminalIn": 4,
+                "terminalOut": 0
             }
         ],
         [
             {
                 "name": "Jzi1",
                 "type": "CurrentSource",
-                "value": 1,
-                "terminalIn": 2, 
-                "terminalOut": 0
+                "value": 0,
+                "terminalIn": 0, 
+                "terminalOut": 2
             }
         ],
         [
@@ -105,7 +105,7 @@
                 "type": "Capacitor",
                 "value": 0.15,
                 "terminalIn": 1, 
-                "terminalOut": 2
+                "terminalOut": 0
             }
         ],
         [
@@ -114,7 +114,7 @@
                 "type": "Capacitor",
                 "value": 0.15,
                 "terminalIn": 1, 
-                "terminalOut": 0
+                "terminalOut": 2
             }
         ],
         [
@@ -122,8 +122,8 @@
                 "name": "Cn",
                 "type": "Capacitor",
                 "value": 0.18,
-                "terminalIn": 4,
-                "terminalOut": 0
+                "terminalIn": 3,
+                "terminalOut": 2
             }
         ],
         [
@@ -131,8 +131,8 @@
                 "name": "Czs2",
                 "type": "Capacitor",
                 "value": 0.18,
-                "terminalIn": 3, 
-                "terminalOut": 4
+                "terminalIn": 4, 
+                "terminalOut": 3
             }
         ]
     ],

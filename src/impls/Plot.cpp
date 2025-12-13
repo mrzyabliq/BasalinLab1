@@ -11,8 +11,8 @@ Plot::Plot(output results, std::vector<std::string> Xstring,
     t.push_back(std::get<0>(results[i]));
     Matrix& X = std::get<1>(results[i]);
     Matrix& Y = std::get<2>(results[i]);
-    for (size_t xi = 0; xi < X.getRows(); ++xi) xs[xi].push_back(X[xi][0]);
-    for (size_t yi = 0; yi < Y.getRows(); ++yi) ys[yi].push_back(Y[yi][0]);
+    for (size_t xi = 0; xi < Xstring.size(); ++xi) xs[xi].push_back(X[xi][0]);
+    for (size_t yi = 0; yi < Ystring.size(); ++yi) ys[yi].push_back(Y[yi][0]);
   }
 }
 

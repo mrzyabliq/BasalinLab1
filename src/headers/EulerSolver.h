@@ -41,11 +41,11 @@ class EulerSolver {
       Matrix& X = std::get<1>(results[i]);
       Matrix& Y = std::get<2>(results[i]);
       std::cout << std::setw(10) << t;
-      for (size_t xi = 0; xi < X.getRows(); ++xi) {
+      for (size_t xi = 0; xi < Xstring.size(); ++xi) {
         std::cout << std::fixed << std::setprecision(6) << std::setw(12)
                   << X[xi][0];
       }
-      for (size_t yi = 0; yi < Y.getRows(); ++yi) {
+      for (size_t yi = 0; yi < Ystring.size(); ++yi) {
         std::cout << std::fixed << std::setprecision(6) << std::setw(12)
                   << Y[yi][0];
       }
@@ -59,14 +59,14 @@ class EulerSolver {
       Matrix& Y_end = std::get<2>(last_result);
       std::cout << std::endl
                 << "Stable condition (t = " << t_end << " s):" << std::endl;
-      for (size_t xi = 0; xi < X_end.getRows(); ++xi) {
+      for (size_t xi = 0; xi < Xstring.size(); ++xi) {
         std::cout << Xstring[xi] << " = " << X_end[xi][0];
         if (Xstring[xi][0] == 'U')
           std::cout << " V" << std::endl;
         else if (Xstring[xi][0] == 'I')
           std::cout << " A" << std::endl;
       }
-      for (size_t yi = 0; yi < Y_end.getRows(); ++yi) {
+      for (size_t yi = 0; yi < Ystring.size(); ++yi) {
         std::cout << Ystring[yi] << " = " << Y_end[yi][0] << " A" << std::endl;
       }
     }

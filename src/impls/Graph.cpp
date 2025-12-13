@@ -250,7 +250,7 @@ void Graph::printMatrixWithLabels() {
   for (size_t i = 0; i < M->getRows(); ++i) {
     std::string chordName = chords[i].second.name + ":";
     std::cout << chords[i].second.name << ":"
-              << std::string(4 - chordName.length(), ' ');
+              << std::string(4, ' ');
 
     for (size_t j = 0; j < M->getCols(); ++j) std::cout << (*M)[i][j] << "  ";
     std::cout << std::endl;
