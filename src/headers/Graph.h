@@ -70,6 +70,7 @@ class Graph {
   std::map<int, Component> stateVariables;
   std::map<int, Component> outputVariables;
   std::map<int, Component> sourceVariables;
+  std::vector<Component> sourceComponents;
   std::vector<Component> resistors;
   std::vector<Component> capacitors;
   std::vector<Component> inductors;

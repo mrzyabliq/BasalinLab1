@@ -4,6 +4,17 @@ Graph::Graph(Circuit circuit, std::vector<std::string> outputs,
              std::vector<std::string> states) {
   this->outputs = outputs;
   this->states = states;
+
+  for (auto branch : circuit.components)
+    for (auto component : branch)
+      if (component.type == ComponentType::VoltageSource)
+        sourceComponents.push_back(component);
+  for (auto branch : circuit.components)
+    for (auto component : branch)
+      if (component.type == ComponentType::CurrentSource)
+        sourceComponents.push_back(component);
+      
+
   for (auto branch : circuit.components) {
     for (auto comp : branch) {
       vertices.insert(comp.terminalIn);
@@ -574,7 +585,7 @@ StateSpaceSystem Graph::buildStateSpaceSystem() {
 
   int VIndex = 0;
   for (auto& [key, value] : sourceVariables) {
-    double sourceValue = value.value;
+    double sourceValue = sourceComponents[VIndex].value;
     (*answer.V).setFunction(
         VIndex, 0, [sourceValue](double t) -> double { return sourceValue; });
     VIndex++;

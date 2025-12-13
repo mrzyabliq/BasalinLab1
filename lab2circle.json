@@ -2,15 +2,6 @@
     "branches": [
         [
             {
-                "name": "Uzi",
-                "type": "VoltageSource",
-                "value": 50,
-                "terminalIn": 2,
-                "terminalOut": 0
-            }
-        ],
-        [
-            {
                 "name": "Czi",
                 "type": "Capacitor",
                 "value": 0.18,
@@ -68,6 +59,15 @@
                 "value": 30.0,
                 "terminalIn": 1,
                 "terminalOut": 2
+            }
+        ],
+        [
+            {
+                "name": "Uzi",
+                "type": "VoltageSource",
+                "value": 50,
+                "terminalIn": 2,
+                "terminalOut": 0
             }
         ],
         [
