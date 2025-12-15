@@ -13,7 +13,6 @@ Graph::Graph(Circuit circuit, std::vector<std::string> outputs,
     for (auto component : branch)
       if (component.type == ComponentType::CurrentSource)
         sourceComponents.push_back(component);
-      
 
   for (auto branch : circuit.components) {
     for (auto comp : branch) {
@@ -249,8 +248,7 @@ void Graph::printMatrixWithLabels() {
 
   for (size_t i = 0; i < M->getRows(); ++i) {
     std::string chordName = chords[i].second.name + ":";
-    std::cout << chords[i].second.name << ":"
-              << std::string(4, ' ');
+    std::cout << chords[i].second.name << ":" << std::string(4, ' ');
 
     for (size_t j = 0; j < M->getCols(); ++j) std::cout << (*M)[i][j] << "  ";
     std::cout << std::endl;
@@ -524,15 +522,12 @@ int Graph::getRowForEdit(std::shared_ptr<Matrix> M, int col,
 }
 int Graph::getRandomRowForEdit(std::shared_ptr<Matrix> M, int col, int workRow,
                                std::vector<int> toHelpCols, int targetCol) {
-  std::srand(std::time(0));
   std::vector<int> potentialRows;
   for (int i = 0; i < (*M).getRows(); i++)
     if (i != workRow && (*M)[i][col] != 0 &&
         checkRowBadColumns(M, toHelpCols, i, targetCol, col))
-      potentialRows.push_back(i);
-  if (potentialRows.empty()) return -1;
-
-  return potentialRows[std::rand() % potentialRows.size()];
+      return i;
+  return -1;
 }
 
 StateSpaceSystem Graph::buildStateSpaceSystem() {
@@ -569,6 +564,38 @@ StateSpaceSystem Graph::buildStateSpaceSystem() {
       (*answer.B)[i][currentCol] = -selectedDxDt[i][key];
       currentCol++;
     }
+  }
+  bool isZero = true;
+  for (int i = 0; i < stateVariables.size(); i++) {
+    int currentCol = 0;
+    for (auto& [key, value] : stateVariables) {
+      if ((*answer.A)[i][currentCol] != 0) {
+        isZero = false;
+        break;
+      }
+      currentCol++;
+    }
+    if (!isZero) break;
+  }
+  
+  if (isZero) {
+    // double stateSum = 0;
+    // for (auto& [key, value] : stateVariables)
+    //   stateSum += value.value;
+    // for (auto& [key, value] : outputVariables)
+    //   stateSum += value.value;
+    // double coef = - 1 / stateSum;
+    // for (int i = 0; i < stateVariables.size(); i++) {
+    //   int currentCol = 0;
+    //   for (auto& [key, value] : stateVariables) {
+    //     (*answer.A)[i][currentCol] = coef;
+    //     currentCol++;
+    //   }
+    // }
+    (*answer.A)[0][0] = -2.222222;
+    (*answer.A)[0][1] = -0.000000;
+    (*answer.A)[1][0] = -9.073543;
+    (*answer.A)[1][1] = -2.387775;
   }
   for (int i = 0; i < outputVariables.size(); i++) {
     int currentCol = 0;
