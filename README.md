@@ -1,10 +1,37 @@
 # BasalinLab1
-Для запуска необходимо указать путь к json файлу цепи в качестве аргумента\
-**пример:**
+## Сборка приложения
+### 1. Установка wsl:
+Откройте PowerShell от имени администратора и выполните:
 ```
+wsl --install -d <DistributionName>
+```
+затем перезагрузите компьютер
+### 2. Настройка VS Code:
+Установите расширение Remote - WSL
+### 3. Установка пакетов:
+Откройте WSL, в PowerShell введите:
+```
+wsl
+```
+В wsl введите:
+```
+sudo apt update && sudo apt upgrade -y
+sudo apt install build-essential -y
+sudo apt install cmake -y
+sudo apt install libeigen3-dev -y
+sudo apt install mesa-utils libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev libglew-dev -y
+sudo apt-get install libglfw3 sudo apt-get install libglfw3-dev
+```
+### 4. Запуск проекта
+После клонирования репозитория перейдите в папку проекта.
+Там последовательно выполните:
+```
+cd Basalinlab1/
+mkdir build
 cd build/
+cmake ..
 make
-./BasalinLab1 ../inputCircuit.json
+./Basalinlab1 ../lab3circuit00.json	
 ```
 # Схема записи электрической цепи в json файл
 В каждой цепи можно выделить узлы, между которыми проходят параллельные соединения, внутри параллельных соединений содержаться последовательные соединения\
