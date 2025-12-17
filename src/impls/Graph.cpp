@@ -565,38 +565,29 @@ StateSpaceSystem Graph::buildStateSpaceSystem() {
       currentCol++;
     }
   }
-  bool isZero = true;
-  for (int i = 0; i < stateVariables.size(); i++) {
-    int currentCol = 0;
-    for (auto& [key, value] : stateVariables) {
-      if ((*answer.A)[i][currentCol] != 0) {
-        isZero = false;
-        break;
-      }
-      currentCol++;
-    }
-    if (!isZero) break;
-  }
+
+  //============HARDCODE============
+  // bool isZero = true;
+  // for (int i = 0; i < stateVariables.size(); i++) {
+  //   int currentCol = 0;
+  //   for (auto& [key, value] : stateVariables) {
+  //     if ((*answer.A)[i][currentCol] != 0) {
+  //       isZero = false;
+  //       break;
+  //     }
+  //     currentCol++;
+  //   }
+  //   if (!isZero) break;
+  // }
   
-  if (isZero) {
-    // double stateSum = 0;
-    // for (auto& [key, value] : stateVariables)
-    //   stateSum += value.value;
-    // for (auto& [key, value] : outputVariables)
-    //   stateSum += value.value;
-    // double coef = - 1 / stateSum;
-    // for (int i = 0; i < stateVariables.size(); i++) {
-    //   int currentCol = 0;
-    //   for (auto& [key, value] : stateVariables) {
-    //     (*answer.A)[i][currentCol] = coef;
-    //     currentCol++;
-    //   }
-    // }
-    (*answer.A)[0][0] = -2.222222;
-    (*answer.A)[0][1] = -0.000000;
-    (*answer.A)[1][0] = -9.073543;
-    (*answer.A)[1][1] = -2.387775;
-  }
+  // if (isZero) {
+  //   (*answer.A)[0][0] = -2.222222;
+  //   (*answer.A)[0][1] = -0.000000;
+  //   (*answer.A)[1][0] = -9.073543;
+  //   (*answer.A)[1][1] = -2.387775;
+  // }
+  //============HARDCODE============
+
   for (int i = 0; i < outputVariables.size(); i++) {
     int currentCol = 0;
     for (auto& [key, value] : stateVariables) {
