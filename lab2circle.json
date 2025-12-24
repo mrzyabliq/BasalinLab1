@@ -4,7 +4,7 @@
             {
                 "name": "Czi",
                 "type": "Capacitor",
-                "value": 0.18,
+                "value": 0.1,
                 "terminalIn": 0, 
                 "terminalOut": 2
             }
@@ -13,7 +13,7 @@
             {
                 "name": "Csi",
                 "type": "Capacitor",
-                "value": 0.15,
+                "value": 0.01,
                 "terminalIn": 1, 
                 "terminalOut": 2
             }
@@ -22,7 +22,7 @@
             {
                 "name": "Czc",
                 "type": "Capacitor",
-                "value": 0.18,
+                "value": 0.11,
                 "terminalIn": 1, 
                 "terminalOut": 0
             }
@@ -31,7 +31,7 @@
             {
                 "name": "Jzi",
                 "type": "CurrentSource",
-                "value": 1,
+                "value": 10,
                 "terminalIn": 1,
                 "terminalOut": 2
             }
@@ -40,7 +40,7 @@
             {
                 "name": "Rsi",
                 "type": "Resistor",
-                "value": 15.0,
+                "value": 10000.0,
                 "terminalIn": 1,
                 "terminalOut": 2
             }
@@ -49,14 +49,14 @@
             {
                 "name": "R",
                 "type": "Resistor",
-                "value": 10.0,
+                "value": 0.1,
                 "terminalIn": 1,
                 "terminalOut": 2
             },
             {
                 "name": "Up",
                 "type": "VoltageSource",
-                "value": 30.0,
+                "value": 5.0,
                 "terminalIn": 1,
                 "terminalOut": 2
             }
@@ -74,7 +74,7 @@
             {
                 "name": "Cn",
                 "type": "Capacitor",
-                "value": 0.12,
+                "value": 0.01,
                 "terminalIn": 1, 
                 "terminalOut": 2
             }

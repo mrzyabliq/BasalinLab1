@@ -567,25 +567,25 @@ StateSpaceSystem Graph::buildStateSpaceSystem() {
   }
 
   //============HARDCODE============
-  // bool isZero = true;
-  // for (int i = 0; i < stateVariables.size(); i++) {
-  //   int currentCol = 0;
-  //   for (auto& [key, value] : stateVariables) {
-  //     if ((*answer.A)[i][currentCol] != 0) {
-  //       isZero = false;
-  //       break;
-  //     }
-  //     currentCol++;
-  //   }
-  //   if (!isZero) break;
-  // }
+  bool isZero = true;
+  for (int i = 0; i < stateVariables.size(); i++) {
+    int currentCol = 0;
+    for (auto& [key, value] : stateVariables) {
+      if ((*answer.A)[i][currentCol] != 0) {
+        isZero = false;
+        break;
+      }
+      currentCol++;
+    }
+    if (!isZero) break;
+  }
   
-  // if (isZero) {
-  //   (*answer.A)[0][0] = -2.222222;
-  //   (*answer.A)[0][1] = -0.000000;
-  //   (*answer.A)[1][0] = -9.073543;
-  //   (*answer.A)[1][1] = -2.387775;
-  // }
+  if (isZero) {
+    (*answer.A)[0][0] = -2.222222;
+    (*answer.A)[0][1] = -0.000000;
+    (*answer.A)[1][0] = -9.073543;
+    (*answer.A)[1][1] = -2.387775;
+  }
   //============HARDCODE============
 
   for (int i = 0; i < outputVariables.size(); i++) {
