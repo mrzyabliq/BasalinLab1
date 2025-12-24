@@ -258,7 +258,7 @@ make
 
 ![alt text](img/image9.png)\
 При
->- Uzi1 = 1.0
+>- Uzi1 = 40.0
 >- Jzi1 = 1.0
 >- Uzi2 = 0.0
 >- Jzi2 = 0.0
@@ -267,16 +267,16 @@ make
 При
 >- Uzi1 = 0.0
 >- Jzi1 = 0.0
->- Uzi2 = 1.0
+>- Uzi2 = 50.0
 >- Jzi2 = 1.0
 
 ![alt text](img/image11.png)\
 При
->- Uzi1 = 1.0
+>- Uzi1 = 40.0
 >- Jzi1 = 1.0
->- Uzi2 = 1.0
+>- Uzi2 = 50.0
 >- Jzi2 = 1.0
 
-![alt text](img/image12.png)\
+![alt text](img/image12.png)
 > [!IMPORTANT]
 > Данные результаты получены при заданной матрице А
